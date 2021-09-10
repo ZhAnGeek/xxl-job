@@ -149,6 +149,15 @@ public class XxlJobTrigger {
                     address = group.getRegistryList().get(0);
                 }
             } else {
+                // py read json -> http goes for boot jobs
+
+                //  { job one: 'BootJob', params: 'vcores memory jobs', do: 'check executable / route single jobs'}
+                //  { job two: 'RunCmdJob', params: 'CMD_TEXT', do: 'run cmd' }
+                // ✅ { job three: 'BeatJob', params: 'none', do: 'record cpu and memory to mysql';, time: 'every seconds'}
+
+                // main job (check executable => max machines left vcore > 2 * needed vcore and max machines left memory > 2 * needed memory)
+                // slice job (check executable => normal machine if enough / if not enough just any max machines)
+
                 routeAddressResult = executorRouteStrategyEnum.getRouter().route(triggerParam, group.getRegistryList());
                 if (routeAddressResult.getCode() == ReturnT.SUCCESS_CODE) {
                     address = routeAddressResult.getContent();

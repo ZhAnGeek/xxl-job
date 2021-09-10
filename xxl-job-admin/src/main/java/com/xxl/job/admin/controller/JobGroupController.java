@@ -2,14 +2,17 @@ package com.xxl.job.admin.controller;
 
 import com.xxl.job.admin.core.model.XxlJobGroup;
 import com.xxl.job.admin.core.model.XxlJobRegistry;
+import com.xxl.job.admin.core.model.XxlJobResource;
 import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.admin.dao.XxlJobGroupDao;
 import com.xxl.job.admin.dao.XxlJobInfoDao;
 import com.xxl.job.admin.dao.XxlJobRegistryDao;
+import com.xxl.job.admin.dao.XxlJobResourceDao;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.enums.RegistryConfig;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -32,6 +35,8 @@ public class JobGroupController {
 	public XxlJobGroupDao xxlJobGroupDao;
 	@Resource
 	private XxlJobRegistryDao xxlJobRegistryDao;
+	@Resource
+	private XxlJobResourceDao xxlJobResourceDao;
 
 	@RequestMapping
 	public String index(Model model) {
@@ -191,6 +196,11 @@ public class JobGroupController {
 	@ResponseBody
 	public ReturnT<XxlJobGroup> loadById(int id){
 		XxlJobGroup jobGroup = xxlJobGroupDao.load(id);
+		List<String> addressList = jobGroup.getRegistryList();
+		if (addressList != null) {
+			List<XxlJobResource> resourceList = xxlJobResourceDao.getResourcesByAddressList(addressList);
+			jobGroup.setResourceList(resourceList);
+		}
 		return jobGroup!=null?new ReturnT<XxlJobGroup>(jobGroup):new ReturnT<XxlJobGroup>(ReturnT.FAIL_CODE, null);
 	}
 

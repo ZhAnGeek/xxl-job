@@ -1,5 +1,6 @@
 package com.xxl.job.admin.controller;
 
+import com.xxl.job.admin.controller.annotation.PermissionLimit;
 import com.xxl.job.admin.core.exception.XxlJobException;
 import com.xxl.job.admin.core.complete.XxlJobCompleter;
 import com.xxl.job.admin.core.model.XxlJobGroup;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -83,7 +85,7 @@ public class JobLogController {
 		List<XxlJobInfo> list = xxlJobInfoDao.getJobsByGroup(jobGroup);
 		return new ReturnT<List<XxlJobInfo>>(list);
 	}
-	
+
 	@RequestMapping("/pageList")
 	@ResponseBody
 	public Map<String, Object> pageList(HttpServletRequest request,
@@ -93,7 +95,7 @@ public class JobLogController {
 
 		// valid permission
 		JobInfoController.validPermission(request, jobGroup);	// 仅管理员支持查询全部；普通用户仅支持查询有权限的 jobGroup
-		
+
 		// parse param
 		Date triggerTimeStart = null;
 		Date triggerTimeEnd = null;
@@ -104,11 +106,11 @@ public class JobLogController {
 				triggerTimeEnd = DateUtil.parseDateTime(temp[1]);
 			}
 		}
-		
+
 		// page query
 		List<XxlJobLog> list = xxlJobLogDao.pageList(start, length, jobGroup, jobId, triggerTimeStart, triggerTimeEnd, logStatus);
 		int list_count = xxlJobLogDao.pageListCount(start, length, jobGroup, jobId, triggerTimeStart, triggerTimeEnd, logStatus);
-		
+
 		// package result
 		Map<String, Object> maps = new HashMap<String, Object>();
 	    maps.put("recordsTotal", list_count);		// 总记录数
@@ -155,6 +157,28 @@ public class JobLogController {
 			logger.error(e.getMessage(), e);
 			return new ReturnT<LogResult>(ReturnT.FAIL_CODE, e.getMessage());
 		}
+	}
+
+	@RequestMapping("/killAll")
+	@ResponseBody
+	@PermissionLimit(limit = false)
+	public ReturnT<String> killAll() {
+		XxlJobGroup group = xxlJobGroupDao.load(1);
+
+		if (group==null || CollectionUtils.isEmpty(group.getRegistryList())) {
+			return new ReturnT<String>(500, I18nUtil.getString("group invalid"));
+		}
+
+		group.getRegistryList().forEach(registry -> {
+			try {
+				ExecutorBiz executorBiz = XxlJobScheduler.getExecutorBiz(registry);
+				executorBiz.kill(new KillParam(3));
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		});
+
+		return ReturnT.SUCCESS;
 	}
 
 	@RequestMapping("/logKill")

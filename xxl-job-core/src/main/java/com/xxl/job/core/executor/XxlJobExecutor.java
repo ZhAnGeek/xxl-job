@@ -50,6 +50,9 @@ public class XxlJobExecutor  {
     public void setAddress(String address) {
         this.address = address;
     }
+    public String getAddress() {
+        return this.address;
+    }
     public void setIp(String ip) {
         this.ip = ip;
     }
@@ -158,6 +161,7 @@ public class XxlJobExecutor  {
         // start
         embedServer = new EmbedServer();
         embedServer.start(address, port, appname, accessToken);
+        this.address = address;
     }
 
     private void stopEmbedServer() {

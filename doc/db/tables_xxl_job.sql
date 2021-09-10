@@ -113,6 +113,22 @@ CREATE TABLE `xxl_job_lock` (
   PRIMARY KEY (`lock_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `xxl_job_resource` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `threadCount` int(11) NOT NULL COMMENT '线程数 单位个',
+  `cpuCount` int(11) NOT NULL COMMENT 'cpu核心数 单位个',
+  `runningCpu` double NOT NULL COMMENT 'cpu占用率 单位%',
+  `remainsCpu` double NOT NULL COMMENT 'cpu核心剩余 单位个',
+  `totalMemory` double NOT NULL COMMENT '总计内存数 单位MB',
+  `remainsMemory` double NOT NULL COMMENT '剩余内存数 单位MB',
+  `usedMemory` double NOT NULL COMMENT '使用内存数 单位MB',
+  `address` varchar(255) DEFAULT 'unknown' NOT NULL COMMENT '节点地址',
+  `dbctime` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `dbutime` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `address_single` (`address`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO `xxl_job_group`(`id`, `app_name`, `title`, `address_type`, `address_list`, `update_time`) VALUES (1, 'xxl-job-executor-sample', '示例执行器', 0, NULL, '2018-11-03 22:21:31' );
 INSERT INTO `xxl_job_info`(`id`, `job_group`, `job_desc`, `add_time`, `update_time`, `author`, `alarm_email`, `schedule_type`, `schedule_conf`, `misfire_strategy`, `executor_route_strategy`, `executor_handler`, `executor_param`, `executor_block_strategy`, `executor_timeout`, `executor_fail_retry_count`, `glue_type`, `glue_source`, `glue_remark`, `glue_updatetime`, `child_jobid`) VALUES (1, 1, '测试任务1', '2018-11-03 22:21:31', '2018-11-03 22:21:31', 'XXL', '', 'CRON', '0 0 0 * * ? *', 'DO_NOTHING', 'FIRST', 'demoJobHandler', '', 'SERIAL_EXECUTION', 0, 0, 'BEAN', '', 'GLUE代码初始化', '2018-11-03 22:21:31', '');
 INSERT INTO `xxl_job_user`(`id`, `username`, `password`, `role`, `permission`) VALUES (1, 'admin', 'e10adc3949ba59abbe56e057f20f883e', 1, NULL);

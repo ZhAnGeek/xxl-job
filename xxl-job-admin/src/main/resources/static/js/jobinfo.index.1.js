@@ -302,33 +302,58 @@ $(function() {
 
         var jobGroup = row.jobGroup;
 
-        $.ajax({
-            type : 'POST',
-            url : base_url + "/jobgroup/loadById",
-            data : {
-                "id" : jobGroup
-            },
-            dataType : "json",
-            success : function(data){
+		var html = '<div id="registry-resource-list">';
+		html += '</div>';
 
-                var html = '<div>';
-                if (data.code == 200 && data.content.registryList) {
-                    for (var index in data.content.registryList) {
-                        html += (parseInt(index)+1) + '. <span class="badge bg-green" >' + data.content.registryList[index] + '</span><br>';
-                    }
-                }
-                html += '</div>';
+		var intervalObj = {};
+		layer.open({
+			title: I18n.jobinfo_opt_registryinfo ,
+			btn: [ I18n.system_ok ],
+			content: html,
+			area: ['500px', ''],
+			cancel: function(_, _) {
+				clearInterval(intervalObj.interval)
+			},
+			yes: function(_, _) {
+				clearInterval(intervalObj.interval)
+			}
+		});
 
-                layer.open({
-                    title: I18n.jobinfo_opt_registryinfo ,
-                    btn: [ I18n.system_ok ],
-                    content: html
-                });
+		intervalObj.interval = setInterval(function () {
+			$.ajax({
+				type: 'POST',
+				url: base_url + "/jobgroup/loadById",
+				data: {
+					"id": jobGroup
+				},
+				dataType: "json",
+				success: function (data) {
+					var html = '';
+					if (data.code == 200 && data.content.registryList && data.content.resourceList) {
+						var totalRemainsMemory = 0;
+						var totalRemainsCpu = 0;
+						for (var index in data.content.resourceList) {
+							totalRemainsCpu += data.content.resourceList[index]['remainsCpu'];
+							totalRemainsMemory += data.content.resourceList[index]['remainsMemory'];
+						}
+						html += '总计' + ' <span class="badge bg-green" >'
+							+ '全部' + ' </span><span class="badge bg-blue" style="margin-left: 20px">'
+							+ totalRemainsMemory + 'MB </span><span class="badge bg-blue" style="margin-left: 20px"> CPU * '
+							+ totalRemainsCpu +' </span><br>';
 
-            }
-        });
+						for (var index in data.content.resourceList) {
+							html += (parseInt(index) + 1) + '. <span class="badge bg-green" >'
+								+ data.content.resourceList[index]['address'] + ' </span><span class="badge bg-blue" style="margin-left: 20px">'
+								+ data.content.resourceList[index]['remainsMemory'] + 'MB </span><span class="badge bg-blue" style="margin-left: 20px"> CPU * '
+								+ data.content.resourceList[index]['remainsCpu'] + ' </span><br>';
+						}
+					}
+					$('#registry-resource-list')[0].innerHTML = html;
+				}
+			});
+		}, 1000);
 
-    });
+	})
 
     // job_next_time
     $("#job_list").on('click', '.job_next_time',function() {

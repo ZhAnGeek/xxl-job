@@ -1,11 +1,16 @@
 package com.xxl.job.executor.core.config;
 
+import com.alibaba.druid.util.StringUtils;
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+
+import javax.annotation.Resource;
+import javax.sql.DataSource;
 
 /**
  * xxl-job config
@@ -40,6 +45,14 @@ public class XxlJobConfig {
     @Value("${xxl.job.executor.logretentiondays}")
     private int logRetentionDays;
 
+    @Bean
+    public NamedParameterJdbcTemplate getNamedPramameterJdbcTemplate(DataSource dataSource) {
+        return new NamedParameterJdbcTemplate(dataSource);
+    }
+
+    public String getAdminAddress() {
+        return adminAddresses;
+    }
 
     @Bean
     public XxlJobSpringExecutor xxlJobExecutor() {
