@@ -7,7 +7,7 @@ public class BootParams {
     private int groupId;
     private int vcore;
     private int memory;
-    private List<String> cmd;
+    private List<BootCommand> containers;
 
     public BootParams(int groupId) {
         this.groupId = groupId;
@@ -37,12 +37,12 @@ public class BootParams {
         this.jobId = jobId;
     }
 
-    public List<String> getCmd() {
-        return cmd;
+    public List<BootCommand> getContainers() {
+        return containers;
     }
 
-    public void setCmd(List<String> cmd) {
-        this.cmd = cmd;
+    public void setContainers(List<BootCommand> containers) {
+        this.containers = containers;
     }
 
     public int getGroupId() {

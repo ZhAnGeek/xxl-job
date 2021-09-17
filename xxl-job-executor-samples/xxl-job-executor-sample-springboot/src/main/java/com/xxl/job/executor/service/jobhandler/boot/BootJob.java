@@ -7,13 +7,10 @@ import com.xxl.job.executor.model.XxlJobGroup;
 import com.xxl.job.executor.model.XxlJobResource;
 import com.xxl.job.executor.storage.JobStorage;
 import com.xxl.job.executor.storage.ResourceStorage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,8 +49,8 @@ public class BootJob {
         List<XxlJobResource> jobResources = resourceStorage.getResourceList();
         double totalMemory = jobResources.stream().mapToDouble(XxlJobResource::getRemainsMemory).sum();
         double totalCpu = jobResources.stream().mapToDouble(XxlJobResource::getRemainsCpu).sum();
-        double totalMemoryNeeds = bootParams.getMemory() * bootParams.getCmd().size();
-        double totalCpuNeeds = bootParams.getVcore() * bootParams.getCmd().size();
+        double totalMemoryNeeds = bootParams.getMemory() * bootParams.getContainers().size();
+        double totalCpuNeeds = bootParams.getVcore() * bootParams.getContainers().size();
 
         if (totalMemory < totalMemoryNeeds) {
             throw new Exception(String.format("total limit resource, total memory is %s, needs %s", totalMemory, totalMemoryNeeds));

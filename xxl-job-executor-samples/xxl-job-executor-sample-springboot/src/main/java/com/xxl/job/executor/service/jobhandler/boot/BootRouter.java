@@ -1,7 +1,5 @@
 package com.xxl.job.executor.service.jobhandler.boot;
 
-import com.alibaba.druid.support.json.JSONUtils;
-import com.google.gson.Gson;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.executor.core.config.XxlJobConfig;
 import com.xxl.job.executor.model.XxlJobResource;
@@ -35,11 +33,11 @@ public class BootRouter {
         List<XxlJobResource> nonReserves = resources.stream()
                 .filter(jr -> jr.getTotalMemory() != maxRemainsMemory)
                 .collect(Collectors.toList());
-        List<String> cmds = params.getCmd();
+        List<String> cmds = params.getContainers().stream().map(BootCommand::getCmd).collect(Collectors.toList());
 
         int cmdIndex = 0;
         // 遍历普通机器提交处理
-        while (!CollectionUtils.isEmpty(nonReserves) && cmdIndex < params.getCmd().size()) {
+        while (!CollectionUtils.isEmpty(nonReserves) && cmdIndex < params.getContainers().size()) {
             XxlJobResource resource = nonReserves.stream().findFirst().orElse(null);
             if (resource == null) {
                 break;
@@ -55,7 +53,7 @@ public class BootRouter {
 
         // 普通机器无法处理，提交给大机器
         int reserveIndex = 0;
-        while (!CollectionUtils.isEmpty(reserves) && cmdIndex < params.getCmd().size()) {
+        while (!CollectionUtils.isEmpty(reserves) && cmdIndex < params.getContainers().size()) {
             XxlJobResource resource = reserves.get(reserveIndex++ % reserves.size());
             remoteExecute(resource.getAddress(), cmds.get(cmdIndex++), params.getJobId());
         }
